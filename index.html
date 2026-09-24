@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kali Linux Terminal</title>
+<style>
+:root{--bg:#0a0a0a;--text:#e0e0e0;--g:#00ff41;--r:#ff3333;--b:#5aa6ff;--y:#ffcc00;--c:#00d4ff;--p:#c074ff}
+*{margin:0;box-sizing:border-box}
+body{font:13px/1.45 'Consolas',monospace;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#boot{position:fixed;inset:0;background:#000;padding:20px;font:11px/1.25 monospace;z-index:9;overflow-y:auto;display:none}
+#boot .ok{color:var(--g)}#boot .err{color:var(--r)}#boot .info{color:var(--c)}#boot .warn{color:var(--y)}#boot .dim{color:#444}
+#h{padding:5px 10px;border-bottom:1px solid #222;flex-shrink:0;font-size:12px;display:flex;justify-content:space-between;align-items:center;background:#0d0d0d}
+#clock{font-size:12px;color:var(--c);opacity:0.8}
+#o{flex:1;padding:10px;overflow-y:auto;min-height:0;word-wrap:break-word}
+.bar{display:flex;align-items:center;padding:5px 10px;border-top:1px solid #222;flex-shrink:0;background:#0d0d0d}
+#i{flex:1;background:transparent;border:none;color:var(--text);font:inherit;outline:none}
+#dragon-wrap{position:absolute;top:50%;right:20px;transform:translateY(-50%);opacity:0.06;pointer-events:none;user-select:none;font-size:10px;z-index:0;white-space:pre;line-height:1.1}
+</style>
+</head>
+<body>
+<div id="boot"></div>
+<div id="dragon-wrap"><pre id="dragon-bg"></pre></div>
+<div id="h">
+  <span><span style="color:var(--g)">┌──(</span><span style="color:var(--r)">kali㉿kali</span><span style="color:var(--g)">)-[</span><span style="color:var(--y)">~</span><span style="color:var(--g)">]</span></span>
+  <span id="clock">--:--:--</span>
+</div>
+<div id="o"></div>
+<div class="bar">
+  <span style="color:var(--g)">└─$&nbsp;</span>
+  <input id="i" autocomplete="off" spellcheck="false">
+</div>
+
+<script>
+// ─── ЧАСЫ ───
+function tick(){const d=new Date();document.getElementById("clock").textContent=d.toLocaleDateString("ru-RU")+" "+d.toLocaleTimeString("ru-RU",{hour12:false})}
+setInterval(tick,1000);tick();
+
+const O=document.getElementById("o"),I=document.getElementById("i"),B=document.getElementById("boot");
+const G="color:var(--g)",R="color:var(--r)",Y="color:var(--y)",C="color:var(--c)",Bl="color:var(--b)",P="color:var(--p)",D="color:#444";
+
+// ─── ДРАКОН KALI LINUX ───
+const dragon =
+"                        ////\\\\\\\\\n" +
+"                       ////  \\\\\\\\\n" +
+"                      ////    \\\\\\\\\n" +
+"                     ////      \\\\\\\\\n" +
+"                    ////        \\\\\\\\\n" +
+"                   ////          \\\\\\\\\n" +
+"                  ////            \\\\\\\\\n" +
+"                 ////     ____     \\\\\\\\\n" +
+"                ////     /    \\     \\\\\\\\\n" +
+"               ////     /  ()  \\     \\\\\\\\\n" +
+"              ////     /        \\     \\\\\\\\\n" +
+"             ////     /__________\\     \\\\\\\\\n" +
+"            ////                      \\\\\\\\\n" +
+"           ////                        \\\\\\\\\n" +
+"          ////                          \\\\\\\\\n" +
+"         ////                            \\\\\\\\\n" +
+"        ////                              \\\\\\\\\n" +
+"       ////                                \\\\\\\\\n" +
+"      ////                                  \\\\\\\\\n" +
+"     ////                                    \\\\\\\\\n" +
+"    ////                                      \\\\\\\\\n" +
+"   ////                                        \\\\\\\\\n" +
+"  ////                                          \\\\\\\\\n" +
+" ////                                            \\\\\\\\\n" +
+"////                                              \\\\\\\\";
+
+// дракон на фон
+document.getElementById("dragon-bg").textContent=dragon;
+
+// ─── ДРАКОН КАК КОМАНДА (детальный ASCII) ───
+const dragonArt = [
+'<span style="color:var(--r)">                    //\\\\\\\\</span>',
+'<span style="color:var(--r)">                   ////\\\\\\\\\\\\</span>',
+'<span style="color:var(--r)">                  ////  \\\\\\\\\\\\</span>',
+'<span style="color:var(--r)">                 ////    \\\\\\\\\\\\</span>',
+'<span style="color:var(--g)">                ////      \\\\\\\\\\\\</span>',
+'<span style="color:var(--g)">               ////        \\\\\\\\\\\\</span>',
+'<span style="color:var(--g)">              ////          \\\\\\\\\\\\</span>',
+'<span style="color:var(--g)">             ////     ____     \\\\\\\\\\\\</span>',
+'<span style="color:var(--b)">            ////     /    \\     \\\\\\\\\\\\</span>',
+'<span style="color:var(--b)">           ////     /  ()  \\     \\\\\\\\\\\\</span>',
+'<span style="color:var(--b)">          ////     /        \\     \\\\\\\\\\\\</span>',
+'<span style="color:var(--y)">         ////     /__________\\     \\\\\\\\\\\\</span>',
+'<span style="color:var(--y)">        ////                      \\\\\\\\\\\\</span>',
+'<span style="color:var(--y)">       ////                        \\\\\\\\\\\\</span>',
+'<span style="color:var(--p)">      ////                          \\\\\\\\\\\\</span>',
+'<span style="color:var(--p)">     ////                            \\\\\\\\\\\\</span>',
+'<span style="color:var(--p)">    ////                              \\\\\\\\\\\\</span>',
+'<span style="color:var(--c)">   ////                                \\\\\\\\\\\\</span>',
+'<span style="color:var(--c)">  ////                                  \\\\\\\\\\\\</span>',
+'<span style="color:var(--c)"> ////                                    \\\\\\\\\\\\</span>',
+'<span style="color:var(--g)">////                                      \\\\\\\\\\\\</span>',
+'',
+'<span style="color:var(--g)">   Kali Linux Dragon</span>',
+'<span style="color:var(--g)">   The quieter you become, the more you are able to hear.</span>'
+].join("\n");
+
+// ─── ФС ───
+let cwd="/home/kali",hist=[],hi=0;
+const fs={
+"/":{"bin":"dir","boot":"dir","dev":"dir","etc":"dir","home":"dir","lib":"dir","opt":"dir","proc":"dir","root":"dir","srv":"dir","tmp":"dir","usr":"dir","var":"dir"},
+"/home/kali":{"flag.txt":"CTF{kali_linux_dragon_pwn3d}","notes.md":"TODO: scan 10.10.10.1\nTODO: sqlmap on /admin?id=1\nDONE: gobuster subdomains","wordlist.txt":"password\n123456\nadmin\nroot\ntoor\nkali\nletmein\nqwerty","secret.enc":"U2FsdGVkX19+ZXJjaXB0ZWQ=",".zshrc":"export PATH=$PATH:/usr/local/bin\nalias ll='ls -la'\nZSH_THEME=\"agnoster\"",".bash_history":"nmap -sV 10.10.10.1\nhydra -l admin -P wordlist.txt 10.10.10.1 ssh\nsqlmap -u http://10.10.10.1/admin --dbs","Desktop":"dir","Documents":"dir","Downloads":"dir","Pictures":"dir"},
+"/etc":{"hostname":"kali","hosts":"127.0.0.1 localhost\n10.0.2.15 kali","os-release":'PRETTY_NAME="Kali GNU/Linux Rolling"\nNAME="Kali GNU/Linux"\nVERSION_ID="2025.2"\nID=kali\nID_LIKE=debian\nHOME_URL="https://www.kali.org/"',"passwd":"root:x:0:0:root:/root:/bin/zsh\nkali:x:1000:1000:kali:/home/kali:/bin/zsh","shadow":"root:$6$salt$hash:19000:0:99999:7:::","resolv.conf":"nameserver 8.8.8.8\nnameserver 1.1.1.1","ssh/sshd_config":"Port 22\nPermitRootLogin yes"},
+"/var/log":{"auth.log":"Sep 11 14:22:01 kali sshd[892]: Accepted password for root\nSep 11 14:23:10 kali sshd[915]: Failed password from 10.10.10.99","syslog":"Sep 11 14:20:00 kali systemd: Started Session\nSep 11 14:21:00 kali kernel: Linux 6.9.0-kali1-amd64"},
+"/usr/share/wordlists":{"rockyou.txt":"# 14M entries\npassword\n123456\nqwerty\nletmein\nadmin\nwelcome","dirb":{"common.txt":"admin\nlogin\nindex\nconfig\ndashboard"}},
+"/proc":{"cpuinfo":"processor: 0\nmodel name: Intel i7-12700K @ 3.60GHz\ncpu cores: 12","meminfo":"MemTotal: 16384000 kB\nMemFree: 8200000 kB","version":"Linux version 6.9.0-kali1-amd64 (gcc 14.2.0)"},
+"/root":{".bashrc":"# root .bashrc"},
+"/var/www/html":{"index.html":"<html><body><h1>It works!</h1></body></html>","config.php":"<?php\n$db='mysql';\n$user='root';\n$pass='toor';\n?>"}
+};
+
+function norm(p){if(!p||p===".")return cwd;if(p==="~"||p==="$HOME")return"/home/kali";if(p.startsWith("~/"))return"/home/kali"+p.slice(1);if(p===".."){const a=cwd.split("/");a.pop();return a.join("/")||"/"}if(p.startsWith("/"))return p.replace(/\/+/g,"/").replace(/\/$/,"")||"/";return(cwd==="/"?"/":cwd+"/")+p}
+function getPath(path){if(path==="/")return fs;const parts=path.split("/").filter(Boolean);let d=fs;for(const p of parts){if(d[p]===undefined)return null;if(d[p]==="dir"){d={};continue}d=d[p];if(typeof d==="string")return d}return d}
+function getDir(path){const d=getPath(path);if(d===null||typeof d==="string")return null;return d}
+function shortPath(p){return p==="/home/kali"?"~":p.replace("/home/kali","~")}
+function prompt(){const sp=shortPath(cwd);return'<span style="'+G+'">┌──(</span><span style="'+R+'">kali㉿kali</span><span style="'+G+')-[</span><span style="'+Y+'">'+sp+'</span><span style="'+G+']</span><br><span style="'+G+'">└─$</span>&nbsp;'}
+
+const allCmds=[
+'<span style="'+Y+'">═══════ KALI LINUX — СПИСОК КОМАНД ═══════</span>',
+'',
+'<span style="'+G+'">Навигация:</span>   cd ls cat pwd whoami uname date echo clear history mkdir touch rm cp mv man exit',
+'<span style="'+G+'">Система:</span>    apt systemctl ifconfig ip neofetch uptime ps top df free dmesg hostname id env',
+'<span style="'+G+'">Сеть:</span>       nmap ping curl wget netstat traceroute dig nslookup whois geoip',
+'<span style="'+G+'">Инструменты:</span> msfconsole hydra sqlmap aircrack john hashcat nikto gobuster searchsploit',
+'<span style="'+G+'">Крипто:</span>     hashid decrypt encode decode',
+'<span style="'+G+'">Прочее:</span>      hack wifi banner fortune cowsay figlet matrix theme dragon clock',
+'',
+'<span style="'+D+'">TAB — автодополнение, ↑↓ — история</span>'
+].join("\n");
+
+const CMD={
+help:()=>allCmds,
+dragon:()=>dragonArt,
+
+ls:function(a){
+  var long=a.some(function(x){return x.startsWith("-")&&x.includes("l")});
+  var all=a.some(function(x){return x.startsWith("-")&&x.includes("a")});
+  var tgt=a.filter(function(x){return!x.startsWith("-")});
+  var dir=tgt[0]?norm(tgt[0]):cwd;
+  var d=getPath(dir);
+  if(d===null)return'<span style="'+R+'">ls: cannot access \''+tgt[0]+'\': No such file</span>';
+  if(typeof d==="string"){var nm=dir.split("/").pop();return long?'-rw-r--r-- 1 kali kali '+String(d.length).padStart(6)+' Sep 11 14:22 '+nm:nm}
+  var keys=Object.keys(d).filter(function(k){return all?true:!k.startsWith(".")});
+  if(!keys.length)return"";
+  if(!long)return keys.map(function(k){return d[k]==="dir"?'<span style="'+Bl+'">'+k+"</span>":k}).join("  ");
+  return keys.map(function(k){var isDir=d[k]==="dir";var sz=isDir?4096:(typeof d[k]==="string"?d[k].length:4096);
+    return(isDir?"d":"-")+(isDir?"rwxr-xr-x":"rw-r--r--")+" 1 kali kali "+String(sz).padStart(6)+" Sep 11 14:22 "+(isDir?'<span style="'+Bl+'">'+k+"</span>":k)}).join("\n")
+},
+cd:function(a){var dir=norm(a[0]||"~");var d=getPath(dir);if(d===null||d==="dir"||typeof d==="string")return'<span style="'+R+'">cd: '+(a[0]||dir)+': No such file</span>';cwd=dir;return null},
+pwd:function(){return cwd},
+whoami:function(){return"root"},
+id:function(){return"uid=0(root) gid=0(root) groups=0(root),27(sudo),1000(kali)"},
+uname:function(a){return a.includes("-a")?"Linux kali 6.9.0-kali1-amd64 #1 SMP PREEMPT_DYNAMIC Kali x86_64 GNU/Linux":"Linux"},
+hostname:function(){return"kali"},
+date:function(){return new Date().toString()},
+clock:function(){return new Date().toLocaleString("ru-RU",{hour12:false})},
+uptime:function(){return" 14:30:00 up 3 days, 2:15, 2 users, load average: 0.12, 0.08, 0.05"},
+echo:function(a){return a.join(" ")},
+env:function(){return"SHELL=/bin/zsh\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\nUSER=root\nHOME=/home/kali\nPWD="+cwd+"\nTERM=xterm-256color"},
+free:function(){return"               total        used        free      shared  buff/cache\nMem:        16384000     4200000     8000000      200000     4184000\nSwap:        8388608           0     8388608"},
+df:function(){return"Filesystem     1K-blocks    Used Available Use% Mounted on\n/dev/sda1       51200000 18000000  33200000  36% /\ntmpfs            8192000       0   8192000   0% /tmp"},
+ps:function(){return"PID TTY TIME CMD\n  1 ?   00:00:02 systemd\n342 ?   00:00:00 journald\n510 ?   00:00:01 NetworkManager\n612 ?   00:00:00 sshd\n901 pts/0 00:00:00 zsh"},
+apt:function(a){
+  if(a[0]==="update")return'<span style="'+C+'">Hit:1</span> http://kali.org kali-rolling InRelease\n<span style="'+G+'">Reading packages... Done</span>\nAll packages up to date.';
+  if(a[0]==="install"){var p=a.filter(function(x){return!x.startsWith("-")});return'<span style="'+C+'">Reading packages... Done</span>\n<span style="'+Y+'">Installing:</span> '+p.join(" ")+'\n<span style="'+G+'">Fetched 4.2 MB in 1s</span>\n<span style="'+G+'">'+p[0]+' installed successfully.</span>'}
+  if(a[0]==="upgrade")return'<span style="'+Y+'">Upgrading:</span> kali-linux-large nmap sqlmap\n4 upgraded, 0 newly installed\n<span style="'+G+'">Done.</span>';
+  return"apt 2.7.14\nUsage: apt [update|install|upgrade]"
+},
+systemctl:function(a){
+  if(a[0]==="status"){var sv={ssh:["ssh.service","Active: <span style='color:var(--g)'>active (running)</span>","PID: 612"],"nginx":["nginx.service","Active: <span style='color:var(--g)'>active (running)</span>"],"postgresql":["postgresql.service","Active: <span style='color:var(--r)'>inactive (dead)</span>"]};
+    return(sv[a[1]]||[(a[1]||"svc")+".service","Active: inactive"]).join("\n")}
+  return'<span style="'+G+'">'+(a[0]||"action")+" "+(a[1]||"service")+".</span>"
+},
+ifconfig:function(){return"eth0: flags=4163 mtu 1500\n        inet 10.0.2.15  netmask 255.255.255.0\n        ether 08:00:27:a4:3f:c1\n\nlo: flags=73 mtu 65536\n        inet 127.0.0.1  netmask 255.0.0.0"},
+ip:function(a){return a[0]==="addr"?"1: lo: inet 127.0.0.1/8\n2: eth0: inet 10.0.2.15/24":"Usage: ip [addr|link]"},
+ping:function(a){if(!a[0])return"Usage: ping <host>";var s="";for(var i=1;i<=4;i++)s+="64 bytes from "+a[0]+": icmp_seq="+i+" ttl=64 time="+(Math.random()*0.5+0.1).toFixed(2)+" ms\n";return"PING "+a[0]+"\n"+s+"4 packets, 0% loss"},
+curl:function(a){return!a[0]?"Usage: curl <url>":"<html><body><h1>It works!</h1>\nServer: Apache/2.4.58</body></html>"},
+wget:function(a){return!a[0]?"Usage: wget <url>":"Connecting "+a[0]+"... <span style='"+G+"'>200 OK</span>\nSaved: index.html (4.2KB)\nDone in 0.8s"},
+netstat:function(a){return a.includes("-tlnp")?"Proto Local   State   PID\ntcp  0.0.0.0:22 LISTEN 612\ntcp6 :::80     LISTEN 680":"Usage: netstat -tlnp"},
+traceroute:function(a){return!a[0]?"Usage: traceroute <host>":"traceroute to "+a[0]+"\n 1  10.0.2.2    0.42ms\n 2  192.168.1.1 1.23ms\n 3  "+a[0]+"     3.67ms"},
+dig:function(a){return!a[0]?"Usage: dig <domain>":"; DiG 9.18 <<>> "+a[0]+"\n"+a[0]+".  300 IN A 93.184.216.34"},
+nslookup:function(a){return!a[0]?"Usage: nslookup <domain>":"Server: 8.8.8.8\nName: "+a[0]+"\nAddress: 93.184.216.34"},
+whois:function(a){return!a[0]?"Usage: whois <domain>":"Domain: "+a[0]+"\nRegistrar: Example LLC\nCreated: 2010-05-15"},
+geoip:function(a){return!a[0]?"Usage: geoip <ip>":"IP: "+a[0]+"\nCountry: Russia\nCity: Moscow\nISP: Rostelecom\nLat: 55.75 / Lon: 37.61"},
+nmap:function(a){
+  if(!a[0]||a[0].startsWith("-"))return"Nmap 7.95\nUsage: nmap [options] <target>\n-sS -sV -A -p <ports>";
+  var t=a.filter(function(x){return!x.startsWith("-")}).join(" ");
+  var sv=a.includes("-sV");
+  var p="22/tcp <span style='"+G+"'>open</span> ssh"+(sv?" OpenSSH 9.2":"")+"\n80/tcp <span style='"+G+"'>open</span> http"+(sv?" Apache 2.4.58":"")+"\n443/tcp <span style='"+G+"'>open</span> https\n3306/tcp <span style='"+G+"'>open</span> mysql";
+  if(a.includes("-A"))p+="\nOS: Linux 5.x (99%)";
+  return"Starting Nmap 7.95\nScan: "+t+"\nPORT     STATE SERVICE\n"+p+"\nDone in 1.42s"
+},
+msfconsole:function(){return'<span style="'+R+'">=[ metasploit v6.4.0 ]</span>\n+ -- --=[ 2389 exploits - 1245 auxiliary ]\n+ -- --=[ 913 payloads - 45 encoders ]\n<span style="'+G+'">msf6></span> use exploit/multi/handler\n<span style="'+G+'">msf6></span> exploit -j\n<span style="'+C+'">[*] Session 1 opened</span>\n<span style="'+Y+'">[!] Simulation only.</span>'},
+hydra:function(a){if(!a[1])return"Hydra v9.5\nUsage: hydra [-l user] <target>";var u=a.includes("-l")?a[a.indexOf("-l")+1]:"admin";var t=a.filter(function(x){return!x.startsWith("-")&&x.includes(".")})[0]||"target";return"Hydra v9.5\n[22][ssh] "+u+"@"+t+" password: letmein\n<span style='"+G+"'>[+] Valid password found!</span>"},
+sqlmap:function(a){return!a[0]?"sqlmap/1.8\nUsage: sqlmap -u <url>":"sqlmap/1.8\n[INFO] testing "+a[0]+"\n[INFO] 'id' injectable\n[INFO] DBMS: MySQL 5.7\n[INFO] databases: information_schema, mysql, users_db\n<span style='"+G+"'>[*] Done.</span>"},
+aircrack:function(a){return!a[0]?"Aircrack-ng 1.7\nUsage: aircrack-ng <file>":"Aircrack-ng 1.7\nOpening "+a[0]+"\n  #  BSSID             ESSID     Encryption\n  1  AA:BB:CC:DD:EE:FF  HomeWiFi  WPA2\n\n<span style='"+G+"'>KEY FOUND! [ password123 ]</span>"},
+john:function(a){return!a[0]?"John 1.9.0\nUsage: john <file>":"John the Ripper 1.9.0\nLoaded 2 hashes\npassword123  (root)\n123456       (kali)\n<span style='"+G+"'>2g in 42s</span>"},
+hashcat:function(a){return!a[0]?"hashcat v6.2.6\nUsage: hashcat <hash> <wordlist>":"hashcat v6.2.6\nMode: sha512crypt\n<span style='"+G+"'>$6$salt$hash:password123</span>\nStatus: Cracked"},
+nikto:function(a){return!a[0]?"Nikto v2.5\nUsage: nikto -h <host>":"Nikto v2.5\n+ Server: Apache/2.4.58\n+ /admin/: Admin login\n+ /config.php: Config file\n+ /backup/: Backup dir\n1 host tested in 8.42s"},
+gobuster:function(a){return!a[0]?"gobuster v3.6\nUsage: gobuster dir -u <url>":"gobuster v3.6\n/admin  (301)\n/login  (200)\n/backup (403)\n/api    (200)\nFinished in 12.42s"},
+searchsploit:function(a){return!a[0]?"Usage: searchsploit <query>":"Exploit DB\n Apache 2.4.58 RCE     | 50123\n MySQL 5.7 Auth Bypass | 50124\n OpenSSH 9.2 User Enum | 50125\n3 results for \""+a[0]+"\""},
+hashid:function(a){return!a[0]?"Usage: hashid <hash>":"Analyzing '"+a[0]+"'\n[+] MD5\n[+] NTLM\n[+] MD4"},
+decrypt:function(a){return!a[0]?"Usage: decrypt <file>":(getPath(norm(a[0]))?"Decrypting "+a[0]+"...\n<span style='"+G+"'>Key: the_secret_is_42</span>":"File not found")},
+encode:function(a){return!a[0]?"Usage: encode <text>":btoa(a.join(" "))},
+decode:function(a){if(!a[0])return"Usage: decode <base64>";try{return atob(a.join(" "))}catch(e){return"Invalid base64"}},
+cat:function(a){if(!a[0])return'<span style="'+R+'">cat: missing operand</span>';var f=getPath(norm(a[0]));if(f===null)return'<span style="'+R+'">cat: '+a[0]+': No such file</span>';if(typeof f==="object")return'<span style="'+R+'">cat: '+a[0]+': Is a directory</span>';return f.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")},
+mkdir:function(a){if(!a[0])return"Usage: mkdir <name>";var d=getDir(cwd);if(d)d[a[0]]="dir";return null},
+touch:function(a){if(!a[0])return"Usage: touch <name>";var d=getDir(cwd);if(d&&!d[a[0]])d[a[0]]="";return null},
+rm:function(a){if(!a[0])return"Usage: rm <name>";var d=getDir(cwd);if(d&&d[a[0]]!==undefined){delete d[a[0]];return null}return'<span style="'+R+'">rm: '+a[0]+': No such file</span>'},
+cp:function(a){return a.length<2?"Usage: cp <src> <dst>":"copied '"+a[0]+"' to '"+a[1]+"'"},
+mv:function(a){if(a.length<2)return"Usage: mv <src> <dst>";var d=getDir(cwd);if(d&&d[a[0]]!==undefined){d[a[1]]=d[a[0]];delete d[a[0]]}return null},
+man:function(a){var m={"nmap":"NMAP(1) — Network Mapper","hydra":"HYDRA(1) — Password cracker","sqlmap":"SQLMAP(1) — SQL injection","msfconsole":"MSFCONSOLE(1) — Metasploit"};return m[a[0]]||"No manual entry for "+(a[0]||"command")},
+clear:function(){return null},
+history:function(){return hist.map(function(h,i){return String(i+1).padStart(5)+"  "+h}).join("\n")},
+neofetch:function(){return'<span style="'+R+'">       _,met$$$$$$</span>       kali@kali\n<span style="'+R+'">    ,g$$$$$$$$P</span>         OS: Kali GNU/Linux Rolling 2025.2\n<span style="'+R+'">  ,g$$$$P"</span>             Kernel: 6.9.0-kali1-amd64\n<span style="'+R+'"> ,$$P"</span>                  Shell: zsh 5.9\n<span style="'+R+'">,$$P</span>                   CPU: Intel i7-12700K\n<span style="'+R+'">$$P</span>                   RAM: 4.2G / 16G\n<span style="'+R+'">$$:  Kali</span>              Uptime: 3 days\n<span style="'+R+'">$$:  Linux</span>              IP: 10.0.2.15\n<span style="'+R+'">                   </span>      <span style="'+G+'">██████████████████████</span>'},
+hack:function(a){return!a[0]?"Usage: hack <ip>":'<span style="'+C+'">[*] Target: '+a[0]+'</span>\n[+] Port 22 open — SSH\n[+] Brute forcing...\n[+] Password: toor\n<span style="'+C+'">[*] Uploading payload...</span>\n[+] <span style="'+G+'">ACCESS GRANTED — root shell</span>\n<span style="'+Y+'">[!] Simulation only.</span>'},
+wifi:function(){return"SSID            Signal  Security\nHomeWiFi        -42dBm  WPA2\nNeighbor_5G     -67dBm  WPA2\nGuest_Network   -71dBm  WPA3\nCoffeeShop      -80dBm  Open"},
+banner:function(){return'<span style="'+R+'">██╗  ██╗</span> <span style="'+G+'">██████╗ </span> <span style="'+Bl+'">██╗██╗</span>\n<span style="'+R+'">██║ ██╔╝</span><span style="'+G+'">██╔═══██╗</span><span style="'+Bl+'">██║██║</span>\n<span style="'+R+'">█████╔╝ </span><span style="'+G+'">██║   ██║</span><span style="'+Bl+'">██║██║</span>\n<span style="'+R+'">██╔═██╗ </span><span style="'+G+'">██║   ██║</span><span style="'+Bl+'">██║██║</span>\n<span style="'+R+'">██║  ██╗</span><span style="'+G+'">╚██████╔╝</span><span style="'+Bl+'">██║███╗</span>\n<span style="'+R+'">╚═╝  ╚═╝</span><span style="'+G+'"> ╚═════╝ </span><span style="'+Bl+'">╚═╝╚══╝</span>'},
+fortune:function(){var q=["Security is a process, not a product. — Schneier","There's no place like 127.0.0.1.","Talk is cheap. Show me the code. — Torvalds","Hack the planet!","There are 10 types of people: those who understand binary and those who don't."];return q[Math.floor(Math.random()*q.length)]},
+cowsay:function(a){var t=a.join(" ")||"Moo!";var l=Math.max(t.length,3);return" "+"_".repeat(l)+"\n< "+t+" >\n "+"-".repeat(l)+"\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\\n                ||----w |\n                ||     ||"},
+figlet:function(){return'<span style="'+R+'"> ██╗  ██╗ █████╗  ██████╗██╗  ██╗██╗   ██╗███████╗</span>\n<span style="'+R+'"> ██║ ██╔╝██╔══██╗██╔════╝██║  ██║██║   ██║██╔════╝</span>\n<span style="'+R+'"> █████╔╝ ███████║██║     ███████║██║   ██║███████╗</span>\n<span style="'+R+'"> ██╔═██╗ ██╔══██║██║     ██╔══██║██║   ██║╚════██║</span>\n<span style="'+R+'"> ██║  ██╗██║  ██║╚██████╗██║  ██║╚██████╔╝███████║</span>\n<span style="'+R+'"> ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝</span>'},
+matrix:function(){return'<span style="'+G+'">Wake up, Neo...</span>\n<span style="'+G+'">The Matrix has you...</span>\n<span style="'+D+'">01001000 01100001 01100011 01101011</span>'},
+theme:function(a){var t={dark:["#0a0a0a","#e0e0e0"],blue:["#001530","#5aa6ff"],green:["#001100","#00ff41"],red:["#1a0000","#ff4444"],amber:["#1a0f00","#ffaa00"]};var v=t[a[0]]||t.dark;document.body.style.background=v[0];document.body.style.color=v[1];return"Theme: "+(a[0]||"dark")},
+dmesg:function(){return["[ 0.000000] Linux 6.9.0-kali1-amd64","[ 0.012345] EXT4-fs mounted","[ 0.045678] systemd: x86-64","[ 0.123456] systemd: Network","[ 0.345678] systemd: SSH","[ 0.789012] systemd: Graphical"].join("\n")},
+top:function(){return"top - 14:30 up 3d 2:15, 2 users\nTasks: 142 total, 1 running\n%Cpu: 3.2 us, 95.7 id\nMem: 16000 total, 8000 free\n  PID USER  %CPU COMMAND\n    1 root   0.0 systemd\n  510 root   0.3 NetworkManager\n  901 kali   0.5 zsh"},
+exit:function(){return'<span style="'+Y+'">logout</span>\n<span style="'+D+'">Connection to kali closed.</span>'}
+};
+
+var buf=[];
+function add(s){buf.push(s);O.innerHTML=buf.join("\n");O.scrollTop=O.scrollHeight}
+function print(s){if(s===null||s===undefined)return;if(typeof s==="string")add(s.replace(/\n/g,"<br>"));else add(String(s))}
+
+function run(raw){
+  var v=raw.trim();
+  if(!v)return;
+  hist.push(v);hi=hist.length;
+  add(prompt()+v);
+  var parts=v.split(/\s+/);
+  var c=parts[0];var a=parts.slice(1);
+  var fn=CMD[c];
+  if(fn){var res=fn(a);if(c==="clear"){buf=[];O.innerHTML="";return}print(res)}
+  else{print('<span style="'+R+'">zsh: команда не найдена: '+c+'</span>\n\n'+allCmds)}
+}
+
+function tabComplete(){
+  var v=I.value;var parts=v.split(" ");
+  if(parts.length===1){
+    var m=Object.keys(CMD).filter(function(k){return k.startsWith(parts[0].toLowerCase())});
+    if(m.length===1)I.value=m[0]+" ";
+    else if(m.length>1)add('<span style="'+D+'">'+m.join("  ")+"</span>")
+  }else if(parts.length===2){
+    var d=getDir(cwd)||{};var k=Object.keys(d).filter(function(x){return x.startsWith(parts[1])});
+    if(k.length===1)I.value=parts[0]+" "+k[0]+" "
+  }
+}
+
+I.addEventListener("keydown",function(e){
+  if(e.key==="Enter"){e.preventDefault();run(I.value);I.value=""}
+  else if(e.key==="Tab"){e.preventDefault();tabComplete()}
+  else if(e.key==="ArrowUp"){e.preventDefault();if(hi>0){hi--;I.value=hist[hi]||""}}
+  else if(e.key==="ArrowDown"){e.preventDefault();if(hi<hist.length-1){hi++;I.value=hist[hi]||""}else{hi=hist.length;I.value=""}}
+});
+
+I.focus();
+document.body.addEventListener("click",function(){I.focus()});
+
+// ─── ЗАГРУЗКА ───
+var bootLines=[
+  ["[ 0.000000]","Linux 6.9.0-kali1-amd64 (gcc 14.2.0)","ok"],
+  ["[ 0.012345]","EXT4-fs (sda1): mounted","ok"],
+  ["[ 0.045678]","systemd: Detected x86-64","info"],
+  ["[ 0.123456]","systemd: Hostname set to kali","info"],
+  ["[ 0.234567]","systemd: Started Journal Service","ok"],
+  ["[ 0.345678]","systemd: Started Network Manager","ok"],
+  ["[ 0.456789]","systemd: Started OpenSSH server","ok"],
+  ["[ 0.567890]","systemd: Reached Multi-User System","ok"],
+  ["[ 0.789012]","systemd: Reached Graphical Interface","ok"],
+  ["[ 0.901234]","systemd: Startup finished in 901ms","ok"],
+  ["","","dim"],
+  ["Kali GNU/Linux Rolling 2025.2 kali tty1","","warn"],
+  ["","","dim"],
+  ["Last login: Thu Sep 11 14:20:01 2025","","dim"],
+  ["","","dim"]
+];
+var bi=0;
+function bootStep(){
+  if(bi>=bootLines.length){
+    B.style.display="none";
+    add('<span style="'+R+'">K</span><span style="'+G+'">a</span><span style="'+Bl+'">l</span><span style="'+Y+'">i</span> <span style="'+P+'">GNU/Linux</span> 2025.2');
+    add(dragonArt);
+    add('<span style="'+D+'">Type <span style="'+Y+'">help</span> or <span style="'+Y+'">dragon</span> for commands.</span>');
+    add("");
+    I.focus();
+    return
+  }
+  var line=bootLines[bi++];
+  var ts=line[0],msg=line[1],type=line[2];
+  var cls=type==="ok"?"ok":type==="info"?"info":type==="warn"?"warn":"dim";
+  var icon=type==="ok"?"<span class='ok'>[ OK ]</span> ":type==="info"?"<span class='info'>[INFO]</span> ":type==="warn"?"<span class='warn'>[ !! ]</span> ":"";
+  B.innerHTML+='<span class="'+cls+'">'+ts+"</span> "+icon+msg+"\n";
+  B.scrollTop=B.scrollHeight;
+  setTimeout(bootStep,90+Math.random()*80)
+}
+B.style.display="block";
+bootStep();
+</script>
+</body>
+</html>
